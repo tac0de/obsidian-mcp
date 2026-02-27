@@ -55,6 +55,73 @@ const getMetadataOutputSchema = z.object({
   frontmatter: z.record(z.string(), z.unknown())
 });
 
+/* ------------------------------------------------------------------ */
+/*  Graph & Context schemas                                            */
+/* ------------------------------------------------------------------ */
+
+const graphBuildInputSchema = z.object({});
+
+const graphBuildOutputSchema = z.object({
+  nodes: z.number().int().nonnegative(),
+  edges: z.number().int().nonnegative(),
+  tags: z.number().int().nonnegative(),
+  buildTimeMs: z.number().nonnegative()
+});
+
+const graphGetNeighborsInputSchema = z.object({
+  path: z.string().min(1),
+  depth: z.number().int().min(1).max(5).optional()
+});
+
+const graphGetNeighborsOutputSchema = z.object({
+  source: z.string(),
+  neighbors: z.array(
+    z.object({
+      path: z.string(),
+      title: z.string().optional(),
+      relationship: z.enum(['outLink', 'backLink', 'sharedTag']),
+      depth: z.number().int().positive()
+    })
+  ),
+  total: z.number().int().nonnegative()
+});
+
+const graphGetBacklinksInputSchema = z.object({
+  path: z.string().min(1)
+});
+
+const graphGetBacklinksOutputSchema = z.object({
+  source: z.string(),
+  backlinks: z.array(
+    z.object({
+      path: z.string(),
+      title: z.string().optional()
+    })
+  ),
+  total: z.number().int().nonnegative()
+});
+
+const contextGatherInputSchema = z.object({
+  path: z.string().min(1),
+  maxNotes: z.number().int().min(1).max(50).optional(),
+  maxTotalBytes: z.number().int().min(1000).max(500_000).optional()
+});
+
+const contextGatherOutputSchema = z.object({
+  source: z.string(),
+  relatedNotes: z.array(
+    z.object({
+      path: z.string(),
+      title: z.string().optional(),
+      score: z.number(),
+      relationship: z.string(),
+      snippet: z.string()
+    })
+  ),
+  totalNodes: z.number().int().nonnegative(),
+  graphDepth: z.number().int().nonnegative()
+});
+
 export const toolSchemas = {
   listNotesInputSchema,
   listNotesOutputSchema,
@@ -63,7 +130,15 @@ export const toolSchemas = {
   searchNotesInputSchema,
   searchNotesOutputSchema,
   getMetadataInputSchema,
-  getMetadataOutputSchema
+  getMetadataOutputSchema,
+  graphBuildInputSchema,
+  graphBuildOutputSchema,
+  graphGetNeighborsInputSchema,
+  graphGetNeighborsOutputSchema,
+  graphGetBacklinksInputSchema,
+  graphGetBacklinksOutputSchema,
+  contextGatherInputSchema,
+  contextGatherOutputSchema
 } as const;
 
 export const toolJsonSchemas = {
@@ -82,5 +157,21 @@ export const toolJsonSchemas = {
   'vault.get_metadata': {
     input: toJsonSchema(getMetadataInputSchema, 'vault.get_metadata.input'),
     output: toJsonSchema(getMetadataOutputSchema, 'vault.get_metadata.output')
+  },
+  'graph.build': {
+    input: toJsonSchema(graphBuildInputSchema, 'graph.build.input'),
+    output: toJsonSchema(graphBuildOutputSchema, 'graph.build.output')
+  },
+  'graph.get_neighbors': {
+    input: toJsonSchema(graphGetNeighborsInputSchema, 'graph.get_neighbors.input'),
+    output: toJsonSchema(graphGetNeighborsOutputSchema, 'graph.get_neighbors.output')
+  },
+  'graph.get_backlinks': {
+    input: toJsonSchema(graphGetBacklinksInputSchema, 'graph.get_backlinks.input'),
+    output: toJsonSchema(graphGetBacklinksOutputSchema, 'graph.get_backlinks.output')
+  },
+  'context.gather': {
+    input: toJsonSchema(contextGatherInputSchema, 'context.gather.input'),
+    output: toJsonSchema(contextGatherOutputSchema, 'context.gather.output')
   }
 } as const;

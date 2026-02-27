@@ -6,7 +6,9 @@ export type VaultErrorCode =
   | 'E_MAX_BYTES_EXCEEDED'
   | 'E_EMPTY_QUERY'
   | 'E_INVALID_PATH'
-  | 'E_INVALID_FOLDER';
+  | 'E_INVALID_FOLDER'
+  | 'E_GRAPH_NOT_BUILT'
+  | 'E_NODE_NOT_FOUND';
 
 export class VaultError extends Error {
   readonly code: VaultErrorCode;

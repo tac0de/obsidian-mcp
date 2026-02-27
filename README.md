@@ -1,48 +1,61 @@
-# obsidian-mcp
+# 🧠 Obsidian MCP: The AI Assistant That Understands Your Thoughts
 
-Deterministic read-only MCP server for Obsidian vaults.
+**Obsidian MCP** turns your Obsidian notes into a "Giant Map of Thoughts" (Intelligent Knowledge Graph). 
+Beyond just reading files, it helps AI understand how your notes are connected, allowing it to find information smarter and faster.
 
-## Scope (v0.1)
+---
 
-- Transport: `stdio` only
-- Runtime: Node.js 20+
-- Tools:
-  - `vault.list_notes(input:{folder?,glob?,limit?}) -> {notes[],total}`
-  - `vault.read_note(input:{path,maxBytes?}) -> {path,content,bytes,sha256,lineCount}`
-  - `vault.search_notes(input:{query,caseSensitive?,limit?}) -> {matches[],total}`
-  - `vault.get_metadata(input:{path}) -> {path,title?,tags[],frontmatter}`
-- Read-only contract: no write/update/delete tools.
+## 🌟 What makes it so great? (Even a 5th grader can get it!)
 
-## Security defaults
+Imagine you wrote lots of notes in a notebook:
+- 📖 **Before**: The AI could only see one page at a time if you told it to.
+- 🚀 **Now**: The AI thinks, "Hey, since he's talking about 'Lions', I should also look at his notes on 'Savanna' and 'Cats'!"
+- 🗺️ **How?**: It looks at your `[[links]]` and `#tags` to build a "Map of your Brain" automatically.
 
-- Vault boundary enforced by `OBSIDIAN_VAULT_ROOT`
-- Path traversal blocked
-- Symlink escape blocked
-- Max file size bounded by `MAX_FILE_BYTES` (default: `262144`)
-- No network calls in tool handlers
+---
 
-## Quick start
+## 🛠️ How to Setup (Super Simple!)
 
+### Step 1: Requirements
+You need **Node.js 20** or higher installed on your computer.
+
+### Step 2: Install
+In your project folder, simply type:
 ```bash
-npm ci
-OBSIDIAN_VAULT_ROOT="/absolute/path/to/vault" npm run dev
+npm install
 ```
 
-Build and test:
+### Step 3: Connect Your Notes (Environment Variables)
+The AI needs to know where your Obsidian Vault is. You just need to tell it two things:
 
+- `OBSIDIAN_VAULT_ROOT`: The **absolute path** to your Obsidian vault folder.
+- `MAX_FILE_BYTES` (Optional): Limits the size of files it reads (Default is 256KB).
+
+### Step 4: Run
+Type this to start the engine:
 ```bash
-npm run typecheck
-npm run test
-npm run build
+OBSIDIAN_VAULT_ROOT="/path/to/your/vault" npm run dev
 ```
 
-## Determinism guarantees
+---
 
-- Sorted path output
-- Sorted match output
-- Stable SHA-256 for note content
-- Fixed validation and error code prefixes for boundary violations
+## 🚀 Smart Features
 
-## License
+This engine gives the AI special powers:
 
-MIT
+1.  **Map Building (`graph.build`)**: Scans all your notes to build a map of connections.
+2.  **Smart Context Gatherer (`context.gather`)**: When you ask about a topic, it finds related notes, summarizes them, and brings them to the AI.
+3.  **Backlink Finder (`graph.get_backlinks`)**: Shows you who else is talking about the current note.
+4.  **Neighbor Explorer (`graph.get_neighbors`)**: Explores everything connected to a specific note.
+5.  **Basic Tools**: Listing, reading, searching, and getting metadata for notes are all supported!
+
+---
+
+## 🔒 Security & Privacy
+- **Read-Only**: It will NEVER change or delete your notes. It only reads them.
+- **Local Only**: Your private thoughts stay on your computer. Nothing is sent to external servers.
+
+---
+
+## 📜 License
+MIT License. Free for everyone to use and improve!

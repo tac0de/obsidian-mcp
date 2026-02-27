@@ -4,9 +4,11 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { toolSchemas } from './schemas.js';
 import { toMcpError } from './errors.js';
 import { VaultReader } from './vault.js';
+import { KnowledgeGraph } from './graph.js';
+import { ContextEngine } from './context.js';
 
 const SERVER_NAME = 'obsidian-mcp';
-const SERVER_VERSION = '0.1.0';
+const SERVER_VERSION = '1.0.0';
 const DEFAULT_MAX_FILE_BYTES = 262_144;
 
 function getEnv(name: string): string {
@@ -47,10 +49,21 @@ export async function createServer(): Promise<McpServer> {
   const maxFileBytes = getMaxFileBytes();
   const reader = await VaultReader.create(vaultRoot, maxFileBytes);
 
+  // Resolve real path for graph
+  const { promises: fsPromises } = await import('node:fs');
+  const resolvedRoot = await fsPromises.realpath(vaultRoot);
+
+  const graph = new KnowledgeGraph(resolvedRoot, maxFileBytes);
+  const contextEngine = new ContextEngine(graph, resolvedRoot, maxFileBytes);
+
   const server = new McpServer({
     name: SERVER_NAME,
     version: SERVER_VERSION
   });
+
+  /* ================================================================ */
+  /*  Vault tools (unchanged)                                         */
+  /* ================================================================ */
 
   server.registerTool(
     'vault.list_notes',
@@ -124,7 +137,113 @@ export async function createServer(): Promise<McpServer> {
     }
   );
 
+  /* ================================================================ */
+  /*  Graph tools (new)                                                */
+  /* ================================================================ */
+
+  server.registerTool(
+    'graph.build',
+    {
+      description:
+        'Build the knowledge graph from the vault. Parses all wikilinks, tags, and computes backlinks. Must be called before using other graph/context tools.',
+      annotations: { readOnlyHint: true, openWorldHint: false },
+      inputSchema: toolSchemas.graphBuildInputSchema.shape,
+      outputSchema: toolSchemas.graphBuildOutputSchema.shape
+    },
+    async () => {
+      try {
+        const stats = await graph.build();
+        return toToolResult(stats);
+      } catch (error) {
+        throw toMcpError(error);
+      }
+    }
+  );
+
+  server.registerTool(
+    'graph.get_neighbors',
+    {
+      description:
+        'Get neighbor nodes of a note in the knowledge graph (BFS traversal). Includes outLinks, backLinks, and shared-tag neighbors. Graph must be built first.',
+      annotations: { readOnlyHint: true, openWorldHint: false },
+      inputSchema: toolSchemas.graphGetNeighborsInputSchema.shape,
+      outputSchema: toolSchemas.graphGetNeighborsOutputSchema.shape
+    },
+    async (input) => {
+      try {
+        await ensureGraphBuilt(graph);
+        const neighbors = graph.getNeighbors(input.path, input.depth ?? 1);
+        return toToolResult({
+          source: input.path,
+          neighbors,
+          total: neighbors.length
+        });
+      } catch (error) {
+        throw toMcpError(error);
+      }
+    }
+  );
+
+  server.registerTool(
+    'graph.get_backlinks',
+    {
+      description:
+        'Get all notes that link to the specified note. Graph must be built first.',
+      annotations: { readOnlyHint: true, openWorldHint: false },
+      inputSchema: toolSchemas.graphGetBacklinksInputSchema.shape,
+      outputSchema: toolSchemas.graphGetBacklinksOutputSchema.shape
+    },
+    async (input) => {
+      try {
+        await ensureGraphBuilt(graph);
+        const backlinks = graph.getBacklinks(input.path);
+        return toToolResult({
+          source: input.path,
+          backlinks,
+          total: backlinks.length
+        });
+      } catch (error) {
+        throw toMcpError(error);
+      }
+    }
+  );
+
+  /* ================================================================ */
+  /*  Context tool (new)                                               */
+  /* ================================================================ */
+
+  server.registerTool(
+    'context.gather',
+    {
+      description:
+        'Gather related context for a note using the knowledge graph. Returns scored related notes with snippets, ranked by relationship strength (direct link > backlink > shared tag > 2-hop). Graph is auto-built on first call.',
+      annotations: { readOnlyHint: true, openWorldHint: false },
+      inputSchema: toolSchemas.contextGatherInputSchema.shape,
+      outputSchema: toolSchemas.contextGatherOutputSchema.shape
+    },
+    async (input) => {
+      try {
+        await ensureGraphBuilt(graph);
+        const result = await contextEngine.gatherContext(
+          input.path,
+          input.maxNotes ?? 10,
+          input.maxTotalBytes ?? 50_000
+        );
+        return toToolResult(result);
+      } catch (error) {
+        throw toMcpError(error);
+      }
+    }
+  );
+
   return server;
+}
+
+/** Auto-build graph on first query if not already built. */
+async function ensureGraphBuilt(graph: KnowledgeGraph): Promise<void> {
+  if (!graph.isBuilt) {
+    await graph.build();
+  }
 }
 
 async function main() {

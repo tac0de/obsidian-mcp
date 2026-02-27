@@ -1,7 +1,7 @@
 {
   "name": "@tac0de/obsidian-mcp",
-  "version": "0.1.1",
-  "description": "Deterministic read-only MCP server for Obsidian vaults",
+  "version": "1.0.0",
+  "description": "Knowledge graph-powered context engine for Obsidian vaults (MCP server)",
   "main": "dist/server.js",
   "scripts": {
     "test": "vitest run",
@@ -15,6 +15,8 @@
     "mcp",
     "obsidian",
     "vault",
+    "knowledge-graph",
+    "context-engine",
     "deterministic",
     "read-only"
   ],
