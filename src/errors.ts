@@ -8,7 +8,12 @@ export type VaultErrorCode =
   | 'E_INVALID_PATH'
   | 'E_INVALID_FOLDER'
   | 'E_GRAPH_NOT_BUILT'
-  | 'E_NODE_NOT_FOUND';
+  | 'E_NODE_NOT_FOUND'
+  | 'E_EXECUTION_DISABLED'
+  | 'E_CAPABILITY_DENIED'
+  | 'E_COMMAND_TIMEOUT'
+  | 'E_COMMAND_FAILED'
+  | 'E_OUTPUT_LIMIT_EXCEEDED';
 
 export class VaultError extends Error {
   readonly code: VaultErrorCode;
@@ -25,10 +30,10 @@ export class VaultError extends Error {
 export function toMcpError(error: unknown): McpError {
   if (error instanceof VaultError) {
     const category =
-      error.code === 'E_FILE_NOT_FOUND'
-        ? ErrorCode.InvalidParams
-        : error.code === 'E_MAX_BYTES_EXCEEDED'
-          ? ErrorCode.InvalidParams
+      error.code === 'E_COMMAND_FAILED'
+        ? ErrorCode.InternalError
+        : error.code === 'E_COMMAND_TIMEOUT'
+          ? ErrorCode.InternalError
           : ErrorCode.InvalidParams;
 
     return new McpError(category, `${error.code}: ${error.message}`);

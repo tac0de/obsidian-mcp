@@ -1,6 +1,6 @@
 {
   "name": "@tac0de/obsidian-mcp",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Knowledge graph-powered context engine for Obsidian vaults (MCP server)",
   "main": "dist/server.js",
   "scripts": {

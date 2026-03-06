@@ -122,6 +122,70 @@ const contextGatherOutputSchema = z.object({
   graphDepth: z.number().int().nonnegative()
 });
 
+const execListCapabilitiesInputSchema = z.object({});
+
+const execListCapabilitiesOutputSchema = z.object({
+  capabilities: z.array(
+    z.object({
+      name: z.string(),
+      tool: z.string(),
+      description: z.string()
+    })
+  ),
+  total: z.number().int().nonnegative()
+});
+
+const execRgSearchInputSchema = z.object({
+  query: z.string().min(1),
+  path: z.string().optional(),
+  limit: z.number().int().min(1).max(500).optional()
+});
+
+const execRgSearchOutputSchema = z.object({
+  query: z.string(),
+  path: z.string(),
+  matches: z.array(
+    z.object({
+      path: z.string(),
+      lineNumber: z.number().int().positive(),
+      line: z.string()
+    })
+  ),
+  total: z.number().int().nonnegative(),
+  durationMs: z.number().nonnegative()
+});
+
+const execListDirInputSchema = z.object({
+  path: z.string().optional(),
+  limit: z.number().int().min(1).max(500).optional()
+});
+
+const execListDirOutputSchema = z.object({
+  path: z.string(),
+  entries: z.array(
+    z.object({
+      name: z.string()
+    })
+  ),
+  total: z.number().int().nonnegative(),
+  durationMs: z.number().nonnegative()
+});
+
+const execGitStatusInputSchema = z.object({});
+
+const execGitStatusOutputSchema = z.object({
+  branch: z.string().optional(),
+  entries: z.array(
+    z.object({
+      path: z.string(),
+      status: z.string(),
+      originalPath: z.string().optional()
+    })
+  ),
+  total: z.number().int().nonnegative(),
+  durationMs: z.number().nonnegative()
+});
+
 export const toolSchemas = {
   listNotesInputSchema,
   listNotesOutputSchema,
@@ -138,7 +202,15 @@ export const toolSchemas = {
   graphGetBacklinksInputSchema,
   graphGetBacklinksOutputSchema,
   contextGatherInputSchema,
-  contextGatherOutputSchema
+  contextGatherOutputSchema,
+  execListCapabilitiesInputSchema,
+  execListCapabilitiesOutputSchema,
+  execRgSearchInputSchema,
+  execRgSearchOutputSchema,
+  execListDirInputSchema,
+  execListDirOutputSchema,
+  execGitStatusInputSchema,
+  execGitStatusOutputSchema
 } as const;
 
 export const toolJsonSchemas = {
@@ -173,5 +245,21 @@ export const toolJsonSchemas = {
   'context.gather': {
     input: toJsonSchema(contextGatherInputSchema, 'context.gather.input'),
     output: toJsonSchema(contextGatherOutputSchema, 'context.gather.output')
+  },
+  'exec.list_capabilities': {
+    input: toJsonSchema(execListCapabilitiesInputSchema, 'exec.list_capabilities.input'),
+    output: toJsonSchema(execListCapabilitiesOutputSchema, 'exec.list_capabilities.output')
+  },
+  'exec.rg_search': {
+    input: toJsonSchema(execRgSearchInputSchema, 'exec.rg_search.input'),
+    output: toJsonSchema(execRgSearchOutputSchema, 'exec.rg_search.output')
+  },
+  'exec.list_dir': {
+    input: toJsonSchema(execListDirInputSchema, 'exec.list_dir.input'),
+    output: toJsonSchema(execListDirOutputSchema, 'exec.list_dir.output')
+  },
+  'exec.git_status': {
+    input: toJsonSchema(execGitStatusInputSchema, 'exec.git_status.input'),
+    output: toJsonSchema(execGitStatusOutputSchema, 'exec.git_status.output')
   }
 } as const;

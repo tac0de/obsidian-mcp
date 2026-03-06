@@ -1,26 +1,23 @@
 #!/usr/bin/env node
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { pathToFileURL } from 'node:url';
 import { toolSchemas } from './schemas.js';
 import { toMcpError } from './errors.js';
 import { VaultReader } from './vault.js';
 import { KnowledgeGraph } from './graph.js';
 import { ContextEngine } from './context.js';
+import { loadExecutionConfig } from './execution-config.js';
+import { AuditLogger } from './audit.js';
+import { SafeCommandRunner } from './safe-command-runner.js';
+import { registerExecutionTools } from './execution.js';
 
 const SERVER_NAME = 'obsidian-mcp';
-const SERVER_VERSION = '1.0.0';
+const SERVER_VERSION = '1.1.0';
 const DEFAULT_MAX_FILE_BYTES = 262_144;
 
-function getEnv(name: string): string {
-  const value = process.env[name]?.trim();
-  if (!value) {
-    throw new Error(`${name} is required`);
-  }
-  return value;
-}
-
-function getMaxFileBytes(): number {
-  const raw = process.env.MAX_FILE_BYTES;
+function getMaxFileBytes(env: NodeJS.ProcessEnv): number {
+  const raw = env.MAX_FILE_BYTES;
   if (!raw) {
     return DEFAULT_MAX_FILE_BYTES;
   }
@@ -44,10 +41,19 @@ function toToolResult<T extends object>(payload: T) {
   };
 }
 
-export async function createServer(): Promise<McpServer> {
-  const vaultRoot = getEnv('OBSIDIAN_VAULT_ROOT');
-  const maxFileBytes = getMaxFileBytes();
+interface CreateServerOptions {
+  env?: NodeJS.ProcessEnv;
+  cwd?: string;
+}
+
+export async function createServer(options: CreateServerOptions = {}): Promise<McpServer> {
+  const env = options.env ?? process.env;
+  const cwd = options.cwd ?? process.cwd();
+  const vaultRoot = getEnvFrom(env, 'OBSIDIAN_VAULT_ROOT');
+  const maxFileBytes = getMaxFileBytes(env);
   const reader = await VaultReader.create(vaultRoot, maxFileBytes);
+  const executionConfig = await loadExecutionConfig(env, cwd);
+  const commandRunner = new SafeCommandRunner(new AuditLogger(), env);
 
   // Resolve real path for graph
   const { promises: fsPromises } = await import('node:fs');
@@ -236,6 +242,8 @@ export async function createServer(): Promise<McpServer> {
     }
   );
 
+  registerExecutionTools(server, executionConfig, commandRunner);
+
   return server;
 }
 
@@ -253,7 +261,25 @@ async function main() {
   console.error(`${SERVER_NAME} ${SERVER_VERSION} running on stdio`);
 }
 
-main().catch((error) => {
-  console.error('FATAL', error);
-  process.exit(1);
-});
+function getEnvFrom(env: NodeJS.ProcessEnv, name: string): string {
+  const value = env[name]?.trim();
+  if (!value) {
+    throw new Error(`${name} is required`);
+  }
+  return value;
+}
+
+function isMainModule(): boolean {
+  if (!process.argv[1]) {
+    return false;
+  }
+
+  return import.meta.url === pathToFileURL(process.argv[1]).href;
+}
+
+if (isMainModule()) {
+  main().catch((error) => {
+    console.error('FATAL', error);
+    process.exit(1);
+  });
+}
