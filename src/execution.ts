@@ -353,7 +353,9 @@ function toPosixPath(value: string): string {
 
 export const executionInternals = {
   parseGitStatus,
-  parseRipgrepJson
+  parseRipgrepJson,
+  resolveWorkspacePath,
+  normalizeRelativePath
 };
 
 function ensureExecutionEnabled(config: ExecutionConfig): void {

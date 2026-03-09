@@ -13,7 +13,11 @@ export type VaultErrorCode =
   | 'E_CAPABILITY_DENIED'
   | 'E_COMMAND_TIMEOUT'
   | 'E_COMMAND_FAILED'
-  | 'E_OUTPUT_LIMIT_EXCEEDED';
+  | 'E_OUTPUT_LIMIT_EXCEEDED'
+  | 'E_UNKNOWN_PROVIDER'
+  | 'E_PROVIDER_NOT_CONFIGURED'
+  | 'E_EMBEDDINGS_DISABLED'
+  | 'E_INDEX_NOT_FOUND';
 
 export class VaultError extends Error {
   readonly code: VaultErrorCode;

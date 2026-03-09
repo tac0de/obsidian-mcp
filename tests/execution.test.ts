@@ -29,7 +29,7 @@ function getRegisteredTools(server: McpServer): Record<string, any> {
 
 describe('execution layer', () => {
   beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'obsidian-mcp-exec-'));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'knowledge-to-action-mcp-exec-'));
     vaultDir = path.join(tempDir, 'vault');
     workspaceDir = path.join(tempDir, 'workspace');
 
@@ -114,7 +114,7 @@ describe('execution layer', () => {
       },
       workspaceDir
     );
-    const server = new McpServer({ name: 'test', version: '1.1.0' });
+    const server = new McpServer({ name: 'test', version: '2.0.0' });
     const runner = new SafeCommandRunner(new AuditLogger(), process.env);
     registerExecutionTools(server, config, runner);
 
@@ -136,7 +136,7 @@ describe('execution layer', () => {
       },
       workspaceDir
     );
-    const server = new McpServer({ name: 'test', version: '1.1.0' });
+    const server = new McpServer({ name: 'test', version: '2.0.0' });
     const runner = new SafeCommandRunner(new AuditLogger(), process.env);
     registerExecutionTools(server, config, runner);
 
@@ -166,7 +166,7 @@ describe('execution layer', () => {
     spawnSync('git', ['init'], { cwd: workspaceDir, stdio: 'ignore' });
     await write(workspaceDir, 'tracked.txt', 'hello\n');
 
-    const server = new McpServer({ name: 'test', version: '1.1.0' });
+    const server = new McpServer({ name: 'test', version: '2.0.0' });
     const runner = new SafeCommandRunner(new AuditLogger(), process.env);
     registerExecutionTools(server, config, runner);
 
@@ -185,7 +185,7 @@ describe('execution layer', () => {
       },
       workspaceDir
     );
-    const server = new McpServer({ name: 'test', version: '1.1.0' });
+    const server = new McpServer({ name: 'test', version: '2.0.0' });
     const runner = new SafeCommandRunner(new AuditLogger(), process.env);
     registerExecutionTools(server, config, runner);
 

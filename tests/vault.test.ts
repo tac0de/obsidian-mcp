@@ -16,7 +16,7 @@ async function write(relPath: string, content: string) {
 
 describe('VaultReader', () => {
   beforeEach(async () => {
-    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), 'obsidian-mcp-test-'));
+    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), 'knowledge-to-action-mcp-test-'));
     await write('b.md', '# Bravo\nfoo\nbar\nfoo');
     await write('a.md', '# Alpha\nfoo');
     await write('nested/c.md', '---\ntitle: Custom\ntags:\n  - governance\n  - mcp\n---\n# Heading\ncontent');

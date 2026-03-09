@@ -1,0 +1,31 @@
+{
+  "mcp_id": "knowledge-to-action-mcp",
+  "version": "v2.1.0",
+  "mode": "local-context",
+  "entrypoints": [
+    "context.retrieve",
+    "context.bundle_for_agent",
+    "action.plan_from_note",
+    "action.handoff_to_repo",
+    "embeddings.index_vault"
+  ],
+  "scope": [
+    "linked-note-context",
+    "semantic-note-retrieval",
+    "agent-action-preview"
+  ],
+  "allowed_data_classes": [
+    "linked-note-context",
+    "semantic-note-retrieval",
+    "agent-action-preview"
+  ],
+  "runtime_path": "/Users/wonyoung_choi/governance-mcps/knowledge-to-action-mcp",
+  "runbook": {
+    "default_mode": "knowledge-to-action-preview",
+    "notes": [
+      "Preview-only action planning. No mutation tools are exposed.",
+      "Embeddings are optional and stored in a local SQLite index.",
+      "Attach workspace root through process cwd and use action.handoff_to_repo for bounded repo inspection."
+    ]
+  }
+}

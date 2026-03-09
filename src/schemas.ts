@@ -122,6 +122,164 @@ const contextGatherOutputSchema = z.object({
   graphDepth: z.number().int().nonnegative()
 });
 
+const embeddingsIndexVaultInputSchema = z.object({
+  glob: z.string().optional(),
+  maxNotes: z.number().int().min(1).max(5000).optional(),
+  chunkSize: z.number().int().min(200).max(4000).optional(),
+  chunkOverlap: z.number().int().min(0).max(2000).optional(),
+  forceReindex: z.boolean().optional()
+});
+
+const embeddingsIndexVaultOutputSchema = z.object({
+  notesIndexed: z.number().int().nonnegative(),
+  chunksIndexed: z.number().int().nonnegative(),
+  skipped: z.number().int().nonnegative(),
+  provider: z.string(),
+  durationMs: z.number().nonnegative()
+});
+
+const retrievalScoreSchema = z.object({
+  lexical: z.number().nonnegative(),
+  graph: z.number().nonnegative(),
+  embedding: z.number().nonnegative(),
+  final: z.number().nonnegative()
+});
+
+const contextRetrieveInputSchema = z.object({
+  query: z.string().min(1),
+  path: z.string().min(1).optional(),
+  maxResults: z.number().int().min(1).max(50).optional(),
+  maxTotalBytes: z.number().int().min(1000).max(500_000).optional(),
+  useEmbeddings: z.boolean().optional()
+});
+
+const contextRetrieveOutputSchema = z.object({
+  query: z.string(),
+  sourcePath: z.string().optional(),
+  retrievalMode: z.enum(['graph', 'hybrid']),
+  results: z.array(
+    z.object({
+      path: z.string(),
+      title: z.string().optional(),
+      snippet: z.string(),
+      relationship: z.string(),
+      scores: retrievalScoreSchema
+    })
+  ),
+  total: z.number().int().nonnegative()
+});
+
+const contextBundleForAgentInputSchema = z.object({
+  path: z.string().min(1),
+  objective: z.string().optional(),
+  maxNotes: z.number().int().min(1).max(20).optional(),
+  maxTotalBytes: z.number().int().min(1000).max(500_000).optional(),
+  workspacePath: z.string().optional(),
+  includeRepoHints: z.boolean().optional()
+});
+
+const contextBundleForAgentOutputSchema = z.object({
+  brief: z.string(),
+  objective: z.string().optional(),
+  source: z.string(),
+  relatedNotes: z.array(
+    z.object({
+      path: z.string(),
+      title: z.string().optional(),
+      score: z.number(),
+      relationship: z.string(),
+      snippet: z.string()
+    })
+  ),
+  keyFacts: z.array(z.string()),
+  openQuestions: z.array(z.string()),
+  risks: z.array(z.string()),
+  repoHints: z.object({
+    matchedFiles: z.array(z.string()),
+    suggestedQueries: z.array(z.string())
+  }),
+  packet: z.object({
+    source: z.string(),
+    objective: z.string().optional(),
+    summary: z.string(),
+    facts: z.array(z.string()),
+    questions: z.array(z.string()),
+    risks: z.array(z.string()),
+    relatedNotes: z.array(
+      z.object({
+        path: z.string(),
+        relationship: z.string(),
+        score: z.number()
+      })
+    ),
+    retrieval: z.array(
+      z.object({
+        path: z.string(),
+        title: z.string().optional(),
+        snippet: z.string(),
+        relationship: z.string(),
+        scores: retrievalScoreSchema
+      })
+    ),
+    repoHints: z.object({
+      matchedFiles: z.array(z.string()),
+      suggestedQueries: z.array(z.string())
+    })
+  })
+});
+
+const actionPlanFromNoteInputSchema = z.object({
+  path: z.string().min(1),
+  objective: z.string().optional(),
+  style: z.enum(['implementation', 'research', 'content', 'ops']).optional(),
+  useModel: z.boolean().optional(),
+  maxRelatedNotes: z.number().int().min(1).max(20).optional()
+});
+
+const actionPlanFromNoteOutputSchema = z.object({
+  source: z.string(),
+  summary: z.string(),
+  goals: z.array(z.string()),
+  constraints: z.array(z.string()),
+  decisions: z.array(z.string()),
+  openQuestions: z.array(z.string()),
+  suggestedActions: z.array(z.string()),
+  handoffPrompt: z.string(),
+  generationMode: z.enum(['deterministic', 'llm'])
+});
+
+const actionHandoffToRepoInputSchema = z.object({
+  path: z.string().min(1),
+  workspacePath: z.string().optional(),
+  queryHints: z.array(z.string()).optional(),
+  maxMatches: z.number().int().min(1).max(100).optional()
+});
+
+const actionHandoffToRepoOutputSchema = z.object({
+  noteSummary: z.string(),
+  matchedFiles: z.array(z.string()),
+  ripgrepHits: z.array(
+    z.object({
+      path: z.string(),
+      lineNumber: z.number().int().positive(),
+      line: z.string()
+    })
+  ),
+  gitStatus: z.object({
+    branch: z.string().optional(),
+    entries: z.array(
+      z.object({
+        path: z.string(),
+        status: z.string(),
+        originalPath: z.string().optional()
+      })
+    ),
+    total: z.number().int().nonnegative()
+  }),
+  nextSteps: z.array(z.string()),
+  warnings: z.array(z.string())
+});
+
 const execListCapabilitiesInputSchema = z.object({});
 
 const execListCapabilitiesOutputSchema = z.object({
@@ -203,6 +361,16 @@ export const toolSchemas = {
   graphGetBacklinksOutputSchema,
   contextGatherInputSchema,
   contextGatherOutputSchema,
+  embeddingsIndexVaultInputSchema,
+  embeddingsIndexVaultOutputSchema,
+  contextRetrieveInputSchema,
+  contextRetrieveOutputSchema,
+  contextBundleForAgentInputSchema,
+  contextBundleForAgentOutputSchema,
+  actionPlanFromNoteInputSchema,
+  actionPlanFromNoteOutputSchema,
+  actionHandoffToRepoInputSchema,
+  actionHandoffToRepoOutputSchema,
   execListCapabilitiesInputSchema,
   execListCapabilitiesOutputSchema,
   execRgSearchInputSchema,
@@ -245,6 +413,26 @@ export const toolJsonSchemas = {
   'context.gather': {
     input: toJsonSchema(contextGatherInputSchema, 'context.gather.input'),
     output: toJsonSchema(contextGatherOutputSchema, 'context.gather.output')
+  },
+  'embeddings.index_vault': {
+    input: toJsonSchema(embeddingsIndexVaultInputSchema, 'embeddings.index_vault.input'),
+    output: toJsonSchema(embeddingsIndexVaultOutputSchema, 'embeddings.index_vault.output')
+  },
+  'context.retrieve': {
+    input: toJsonSchema(contextRetrieveInputSchema, 'context.retrieve.input'),
+    output: toJsonSchema(contextRetrieveOutputSchema, 'context.retrieve.output')
+  },
+  'context.bundle_for_agent': {
+    input: toJsonSchema(contextBundleForAgentInputSchema, 'context.bundle_for_agent.input'),
+    output: toJsonSchema(contextBundleForAgentOutputSchema, 'context.bundle_for_agent.output')
+  },
+  'action.plan_from_note': {
+    input: toJsonSchema(actionPlanFromNoteInputSchema, 'action.plan_from_note.input'),
+    output: toJsonSchema(actionPlanFromNoteOutputSchema, 'action.plan_from_note.output')
+  },
+  'action.handoff_to_repo': {
+    input: toJsonSchema(actionHandoffToRepoInputSchema, 'action.handoff_to_repo.input'),
+    output: toJsonSchema(actionHandoffToRepoOutputSchema, 'action.handoff_to_repo.output')
   },
   'exec.list_capabilities': {
     input: toJsonSchema(execListCapabilitiesInputSchema, 'exec.list_capabilities.input'),

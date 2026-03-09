@@ -1,7 +1,7 @@
 {
-  "name": "@tac0de/obsidian-mcp",
-  "version": "1.1.0",
-  "description": "Knowledge graph-powered context engine for Obsidian vaults (MCP server)",
+  "name": "@tac0de/knowledge-to-action-mcp",
+  "version": "2.1.0",
+  "description": "Knowledge-to-action MCP for graph-aware Obsidian context and safe workspace actions",
   "main": "dist/server.js",
   "scripts": {
     "test": "vitest run",
@@ -17,8 +17,10 @@
     "vault",
     "knowledge-graph",
     "context-engine",
-    "deterministic",
-    "read-only"
+    "knowledge-to-action",
+    "agent",
+    "workspace",
+    "deterministic"
   ],
   "author": "",
   "license": "MIT",
@@ -31,16 +33,19 @@
     "@modelcontextprotocol/sdk": "^1.27.1",
     "fast-glob": "^3.3.3",
     "gray-matter": "^4.0.3",
+    "sql.js": "^1.13.0",
     "zod": "^4.3.6",
     "zod-to-json-schema": "^3.25.1"
   },
   "devDependencies": {
     "@types/node": "^25.3.0",
+    "@types/sql.js": "^1.4.9",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   },
   "bin": {
+    "knowledge-to-action-mcp": "dist/server.js",
     "obsidian-mcp": "dist/server.js"
   },
   "publishConfig": {
@@ -48,14 +53,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tac0de/obsidian-mcp.git"
+    "url": "git+https://github.com/tac0de/knowledge-to-action-mcp.git"
   },
-  "homepage": "https://github.com/tac0de/obsidian-mcp#readme",
+  "homepage": "https://github.com/tac0de/knowledge-to-action-mcp#readme",
   "bugs": {
-    "url": "https://github.com/tac0de/obsidian-mcp/issues"
+    "url": "https://github.com/tac0de/knowledge-to-action-mcp/issues"
   },
   "files": [
     "dist",
+    "manifest.json",
     "README.md",
     "LICENSE",
     "SECURITY.md",
