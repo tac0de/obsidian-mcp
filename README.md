@@ -2,6 +2,8 @@
 
 > Turn Obsidian knowledge into agent-ready action plans.
 
+![Knowledge-to-Action MCP](./github-thumbnail.png)
+
 `knowledge-to-action-mcp` is an MCP server for people whose real context lives in notes, not just code.
 
 It starts with Obsidian-aware graph retrieval, adds optional embedding-based GraphRAG, then goes one step further: it turns notes into structured agent context, preview-only action plans, and bounded repo handoffs.
