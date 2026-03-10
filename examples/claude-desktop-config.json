@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "knowledge-to-action": {
+      "command": "npx",
+      "args": ["-y", "@tac0de/knowledge-to-action-mcp"],
+      "env": {
+        "OBSIDIAN_VAULT_ROOT": "/absolute/path/to/your/obsidian-vault",
+        "PLANNING_ENABLED": "true",
+        "EMBEDDINGS_ENABLED": "false"
+      }
+    }
+  }
+}

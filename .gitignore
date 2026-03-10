@@ -1,6 +1,16 @@
 node_modules/
 dist/
 .vscode/
+.idea/
 .DS_Store
 *.log
 coverage/
+.env
+.env.*
+.npmrc
+.knowledge-to-action-mcp/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.tgz
+*.tsbuildinfo

@@ -1,0 +1,31 @@
+{
+  "brief": "Implement dashboard search using the existing flow and linked note context.",
+  "source": "roadmap/search.md",
+  "keyFacts": [
+    "Dashboard search is the first scope.",
+    "Preview-only planning is preferred before implementation.",
+    "Search should likely start from existing entrypoints."
+  ],
+  "openQuestions": [
+    "Where is the current search entrypoint?",
+    "Should initial ranking use title only or title plus body?"
+  ],
+  "risks": [
+    "Repo layout may not match note assumptions.",
+    "Search quality may be weak if ranking is too narrow."
+  ],
+  "relatedNotes": [
+    "decisions/search-scope.md",
+    "meetings/2026-03-07-search-review.md"
+  ],
+  "repoHints": {
+    "matchedFiles": [
+      "src/search.ts",
+      "src/features/search/index.ts"
+    ],
+    "suggestedQueries": [
+      "search",
+      "dashboard search"
+    ]
+  }
+}

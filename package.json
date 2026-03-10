@@ -1,7 +1,7 @@
 {
   "name": "@tac0de/knowledge-to-action-mcp",
-  "version": "2.1.0",
-  "description": "Knowledge-to-action MCP for graph-aware Obsidian context and safe workspace actions",
+  "version": "2.1.1",
+  "description": "MCP server for Obsidian GraphRAG, agent-ready context, preview-only planning, and safe repo handoffs",
   "main": "dist/server.js",
   "scripts": {
     "test": "vitest run",
@@ -13,12 +13,18 @@
   },
   "keywords": [
     "mcp",
+    "mcp-server",
+    "model-context-protocol",
     "obsidian",
+    "graph-rag",
+    "rag",
     "vault",
     "knowledge-graph",
     "context-engine",
     "knowledge-to-action",
     "agent",
+    "agentic-rag",
+    "developer-tools",
     "workspace",
     "deterministic"
   ],

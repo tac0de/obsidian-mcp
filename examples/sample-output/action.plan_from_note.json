@@ -1,0 +1,25 @@
+{
+  "source": "roadmap/search.md",
+  "summary": "Implement dashboard search with minimal code churn and explicit preview before edits.",
+  "goals": [
+    "Ship dashboard search first.",
+    "Reuse current search entrypoints when possible."
+  ],
+  "constraints": [
+    "No unrestricted shell access.",
+    "No file mutation without explicit approval."
+  ],
+  "decisions": [
+    "Dashboard scope comes before semantic ranking."
+  ],
+  "openQuestions": [
+    "Where is the current search entrypoint?",
+    "Who owns the existing search components?"
+  ],
+  "suggestedActions": [
+    "Inspect existing search files.",
+    "Confirm ranking scope for initial release.",
+    "Review linked meeting and decision notes before implementation."
+  ],
+  "generationMode": "deterministic"
+}

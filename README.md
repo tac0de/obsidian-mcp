@@ -1,32 +1,49 @@
 # Knowledge-to-Action MCP
 
-> Turn Obsidian knowledge into agent-ready action plans.
+> Turn Obsidian notes into agent-ready context, preview-only plans, and safe repo handoffs.
+
+[![CI](https://github.com/tac0de/knowledge-to-action-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/tac0de/knowledge-to-action-mcp/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/%40tac0de%2Fknowledge-to-action-mcp)](https://www.npmjs.com/package/@tac0de/knowledge-to-action-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 
 ![Knowledge-to-Action MCP](./github-thumbnail.png)
 
-`knowledge-to-action-mcp` is an MCP server for people whose real context lives in notes, not just code.
+`knowledge-to-action-mcp` is an MCP server for people whose real project context lives in notes, decisions, roadmaps, and meeting docs, not just code.
 
-It starts with Obsidian-aware graph retrieval, adds optional embedding-based GraphRAG, then goes one step further: it turns notes into structured agent context, preview-only action plans, and bounded repo handoffs.
+Most Obsidian MCP servers stop at "read a note" or "search a vault."
 
-## Why This Exists
+This one goes further:
 
-Most note integrations stop at:
+```text
+notes -> retrieval -> context packet -> action plan -> repo handoff
+```
 
-- read a file
-- search a vault
-- maybe follow links
+That means an MCP client can move from:
 
-That is useful, but incomplete.
+```text
+"open this markdown file"
+```
 
-If you are actually using an agent, the real workflow is:
+to:
 
-1. find the right note
-2. recover nearby context
-3. understand what matters
-4. turn it into a concrete plan
-5. connect it to the repo without opening a dangerous shell
+```text
+"understand the note, pull nearby context, summarize risks,
+propose next steps, and show which repo files probably matter"
+```
 
-That is what this package does.
+## Why It Matters
+
+If you work out of Obsidian, your important context is usually spread across:
+
+- roadmap notes
+- meeting notes
+- decisions
+- linked references
+- repo assumptions
+
+Normal note integrations make an agent read those files.
+
+`knowledge-to-action-mcp` helps an agent recover the surrounding context and turn it into something actionable without exposing a general shell runner.
 
 ## What Makes It Different
 
@@ -42,7 +59,7 @@ That is what this package does.
 | Note-to-repo handoff | No | Yes |
 | General shell access | Sometimes | No |
 
-## 30-Second Demo
+## 1-Minute Quickstart
 
 Install:
 
@@ -57,7 +74,7 @@ OBSIDIAN_VAULT_ROOT="/path/to/vault" \
 npx @tac0de/knowledge-to-action-mcp
 ```
 
-Turn on optional embeddings and model planning:
+Turn on optional embeddings and planning:
 
 ```bash
 OBSIDIAN_VAULT_ROOT="/path/to/vault" \
@@ -67,35 +84,22 @@ OPENAI_API_KEY="..." \
 npx @tac0de/knowledge-to-action-mcp
 ```
 
-Then use these tools:
+Then call:
 
 - `context.retrieve`
 - `context.bundle_for_agent`
 - `action.plan_from_note`
 - `action.handoff_to_repo`
 
-## The Core Idea
+See also:
 
-This project is built around a simple chain:
+- sample vault: [`examples/sample-vault/`](./examples/sample-vault/)
+- sample outputs: [`examples/sample-output/`](./examples/sample-output/)
+- Claude Desktop config example: [`examples/claude-desktop-config.json`](./examples/claude-desktop-config.json)
+- VS Code config example: [`examples/vscode-mcp.json`](./examples/vscode-mcp.json)
+- Cursor config example: [`examples/cursor-mcp.json`](./examples/cursor-mcp.json)
 
-```text
-notes -> retrieval -> context packet -> action plan -> repo handoff
-```
-
-That means your MCP client can move from:
-
-```text
-"open this markdown file"
-```
-
-to:
-
-```text
-"understand the note, pull nearby context, summarize risks, suggest next actions,
-and show which repo files are probably relevant"
-```
-
-## What You Get
+## What You Actually Get
 
 ### 1. Obsidian-aware retrieval
 
@@ -103,20 +107,23 @@ and show which repo files are probably relevant"
 - wikilink resolution
 - backlinks
 - shared-tag neighbors
-- graph-aware context gathering
+- graph-aware context recovery
 
 ### 2. Optional GraphRAG
 
-- markdown chunking
-- local SQLite index
-- optional embeddings
-- hybrid retrieval: lexical + graph + semantic rerank
+When embeddings are enabled, retrieval becomes:
 
-No `Neo4j` required.
+```text
+lexical + graph + semantic rerank
+```
+
+No external graph database is required.
 
 ### 3. Agent-ready context packets
 
-Instead of dumping raw notes into a prompt, `context.bundle_for_agent` returns a structured packet:
+`context.bundle_for_agent` returns a structured packet instead of dumping raw markdown into a prompt.
+
+That packet includes:
 
 - brief
 - key facts
@@ -124,8 +131,6 @@ Instead of dumping raw notes into a prompt, `context.bundle_for_agent` returns a
 - risks
 - related notes
 - repo hints
-
-This is much closer to what an agent actually needs.
 
 ### 4. Preview-only action planning
 
@@ -139,19 +144,19 @@ This is much closer to what an agent actually needs.
 - suggested actions
 - handoff prompt
 
-It does **not** mutate files.
+It does not mutate files.
 
 ### 5. Safe repo handoff
 
-`action.handoff_to_repo` connects note context to a workspace by using:
+`action.handoff_to_repo` connects note context to a workspace using:
 
 - bounded ripgrep queries
 - bounded git status
 - matched file suggestions
 
-This is intentionally not a shell runner.
+This is intentionally not a general-purpose shell runner.
 
-## Example: Why This Is Useful
+## Example Workflow
 
 Imagine you have these notes:
 
@@ -164,20 +169,23 @@ And a repo with:
 - `src/search.ts`
 - `src/features/search/index.ts`
 
-A normal note MCP can help an agent read `roadmap/search.md`.
+This MCP can help an agent:
 
-This MCP can do more:
-
-1. `context.retrieve("search ranking", path="roadmap/search.md")`
-   It finds nearby notes using search, backlinks, tags, graph neighbors, and optional embeddings.
-2. `context.bundle_for_agent(path="roadmap/search.md")`
-   It compresses the useful context into a packet with risks and open questions.
-3. `action.plan_from_note(path="roadmap/search.md")`
-   It turns the note into a concrete preview-only plan.
-4. `action.handoff_to_repo(path="roadmap/search.md")`
-   It shows which files in the repo are probably relevant before the agent edits anything.
+1. Retrieve nearby notes with search, backlinks, tags, graph neighbors, and optional embeddings.
+2. Compress that note cluster into a structured context packet.
+3. Turn the source note into a preview-only action plan.
+4. Suggest likely repo files before any edit happens.
 
 That jump from "read notes" to "prepare action safely" is the whole point.
+
+## Demo Assets
+
+If you want something concrete before wiring your own vault:
+
+- sample vault notes live in [`examples/sample-vault/`](./examples/sample-vault/)
+- example `context.bundle_for_agent` output lives in [`examples/sample-output/context.bundle_for_agent.json`](./examples/sample-output/context.bundle_for_agent.json)
+- example `action.plan_from_note` output lives in [`examples/sample-output/action.plan_from_note.json`](./examples/sample-output/action.plan_from_note.json)
+- example Claude Desktop config lives in [`examples/claude-desktop-config.json`](./examples/claude-desktop-config.json)
 
 ## Public Tools
 
@@ -288,6 +296,56 @@ That jump from "read notes" to "prepare action safely" is the whole point.
 - `EXECUTION_TIMEOUT_MS=5000`
 - `EXECUTION_MAX_OUTPUT_BYTES=32768`
 
+## Install In MCP Clients
+
+Example stdio config:
+
+```json
+{
+  "command": "npx",
+  "args": ["-y", "@tac0de/knowledge-to-action-mcp"],
+  "env": {
+    "OBSIDIAN_VAULT_ROOT": "/path/to/vault"
+  }
+}
+```
+
+### VS Code
+
+Add to `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "knowledge-to-action": {
+      "command": "npx",
+      "args": ["-y", "@tac0de/knowledge-to-action-mcp"],
+      "env": {
+        "OBSIDIAN_VAULT_ROOT": "/path/to/vault"
+      }
+    }
+  }
+}
+```
+
+### Cursor
+
+Add to `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "knowledge-to-action": {
+      "command": "npx",
+      "args": ["-y", "@tac0de/knowledge-to-action-mcp"],
+      "env": {
+        "OBSIDIAN_VAULT_ROOT": "/path/to/vault"
+      }
+    }
+  }
+}
+```
+
 ## Security Boundary
 
 This package is designed to be useful without turning into a local shell bomb.
@@ -312,21 +370,7 @@ Use this project if you want:
 - a general purpose agent runtime
 - a write-enabled automation framework
 - a hosted knowledge platform
-- a vector DB product
-
-## Install In MCP Clients
-
-Example stdio command:
-
-```json
-{
-  "command": "npx",
-  "args": ["-y", "@tac0de/knowledge-to-action-mcp"],
-  "env": {
-    "OBSIDIAN_VAULT_ROOT": "/path/to/vault"
-  }
-}
-```
+- a vector database product
 
 ## Compatibility
 
@@ -336,13 +380,13 @@ Example stdio command:
 
 ## Status
 
-`v2.1` is real and tested:
+`v2.1.1` is usable now:
 
 - typecheck passes
-- unit/integration tests pass
+- unit and integration tests pass
 - npm pack dry-run passes
 
-The project is still early, but the core workflow is already usable.
+The project is still early, but the main workflow is already working.
 
 ## License
 

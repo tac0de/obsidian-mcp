@@ -1,6 +1,6 @@
 {
   "mcp_id": "knowledge-to-action-mcp",
-  "version": "v2.1.0",
+  "version": "v2.1.1",
   "mode": "local-context",
   "entrypoints": [
     "context.retrieve",
@@ -19,7 +19,7 @@
     "semantic-note-retrieval",
     "agent-action-preview"
   ],
-  "runtime_path": "/Users/wonyoung_choi/governance-mcps/knowledge-to-action-mcp",
+  "runtime_path": ".",
   "runbook": {
     "default_mode": "knowledge-to-action-preview",
     "notes": [

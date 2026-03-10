@@ -1,0 +1,36 @@
+name: Bug report
+description: Report a reproducible problem in the MCP server.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: MCP config
+      description: Include your MCP client config with secrets removed.
+      render: json
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the shortest path to reproduce the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or error output
+      description: Paste the relevant logs or stack trace.
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: 2.1.1
